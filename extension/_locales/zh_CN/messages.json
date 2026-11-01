@@ -1,0 +1,5 @@
+{
+  "extName": { "message": "智能下载命名 · SmartName" },
+  "extShort": { "message": "智能下载命名" },
+  "extDesc": { "message": "下载时自动把 a8f3e2c1.pdf 这类乱码文件名，改成看得懂的标题 + 下载日期。支持 DeepSeek / OpenAI / xAI，无 Key 也能用页面标题命名。" }
+}

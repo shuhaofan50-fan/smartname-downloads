@@ -1,0 +1,33 @@
+:root{--bg:#f5f7fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent2:#06b6d4;--ok:#059669;--okbg:#ecfdf5;--warn:#b45309;--warnbg:#fffbeb;--err:#dc2626;--errbg:#fef2f2;--chip:#eef2ff;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);--grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#06b6d4 100%)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1117;--card:#181b24;--text:#e5e7eb;--muted:#9ca3af;--line:#2a2f3a;--accent:#818cf8;--chip:#232845;--okbg:#06281f;--ok:#34d399;--warnbg:#2b2110;--warn:#fbbf24;--errbg:#2c1214;--err:#f87171;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+.card h3{margin:0 0 4px;font-size:15px}.card .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+.brand{display:flex;align-items:center;gap:10px}.brand img{width:32px;height:32px;border-radius:9px}
+.brand .name{font-weight:700;font-size:15px}.brand .tag{font-size:11.5px;color:var(--muted)}
+.switch{position:relative;display:inline-block;width:44px;height:26px;flex:none}.switch input{opacity:0;width:0;height:0}
+.switch span{position:absolute;inset:0;background:#cbd5e1;border-radius:99px;transition:.2s;cursor:pointer}
+.switch span:before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.switch input:checked+span{background:var(--grad)}.switch input:checked+span:before{transform:translateX(18px)}
+.switch.lg{width:54px;height:30px}.switch.lg span:before{width:24px;height:24px}.switch.lg input:checked+span:before{transform:translateX(24px)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+.row .t{font-weight:500}.row .d{color:var(--muted);font-size:12.5px}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 6px;font-weight:500}
+input[type=text],input[type=password],select{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:var(--card);color:var(--text);padding:6px 14px;border-radius:99px;cursor:pointer;font:inherit;font-size:13px;transition:.15s}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--chip);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btn{border:0;border-radius:10px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;transition:.15s}
+.btn.primary{background:var(--grad);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,.3)}.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:var(--chip);color:var(--accent)}.btn:disabled{opacity:.6;cursor:default}
+.pw{position:relative}.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:4px 8px}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--chip);color:var(--accent)}
+.badge.basic{background:color-mix(in srgb,var(--muted) 15%,transparent);color:var(--muted)}.badge.builtin{background:var(--okbg);color:var(--ok)}
+.status{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:8px 12px;border-radius:10px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.status.ok{background:var(--okbg);color:var(--ok)}.status.warn{background:var(--warnbg);color:var(--warn)}.status.err{background:var(--errbg);color:var(--err)}.status.idle{background:var(--chip);color:var(--muted)}
+.preview{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;word-break:break-all}
+.preview .old{color:var(--muted);text-decoration:line-through}.preview .new{color:var(--accent);font-weight:600}
+.muted{color:var(--muted)}a{color:var(--accent)}
+[hidden]{display:none!important}
