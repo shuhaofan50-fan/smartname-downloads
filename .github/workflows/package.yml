@@ -1,0 +1,68 @@
+name: Test and package
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Node tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: |
+          for f in lib.js background.js popup.js options.js content.js offscreen.js welcome.js; do
+            node --check "$f"
+          done
+      - name: Run tests
+        run: |
+          node test/lib.test.js
+          node test/sw-listener.test.js
+
+  release:
+    name: Package extension and attach to release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip extension
+        run: |
+          mkdir -p dist
+          cd extension
+          # Manifest at the archive root. Leave tests and icon-build scripts out of the release zip.
+          zip -r "../dist/smartname-downloads-${GITHUB_REF_NAME}.zip" . \
+            -x "test/*" -x "test/**" -x "scripts/*" -x "scripts/**"
+      - name: Verify zip layout
+        run: |
+          zipfile="dist/smartname-downloads-${GITHUB_REF_NAME}.zip"
+          unzip -l "$zipfile"
+          unzip -p "$zipfile" manifest.json | grep '"version"'
+          if unzip -l "$zipfile" | grep -E 'test/|scripts/'; then
+            echo "release zip must not contain test/ or scripts/" >&2
+            exit 1
+          fi
+      - name: Attach zip to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          asset="dist/smartname-downloads-${tag}.zip"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+          else
+            gh release create "$tag" "$asset" \
+              --title "SmartName Downloads ${tag}" \
+              --notes "Chrome extension package (Manifest V3). Unzip and load the folder with Chrome → chrome://extensions → Load unpacked. The manifest is at the root of the archive."
+          fi

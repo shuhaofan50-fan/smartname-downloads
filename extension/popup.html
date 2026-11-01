@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><link rel="stylesheet" href="ui.css">
+<style>body{width:360px;padding:14px}.hero{background:var(--grad);color:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 24px rgba(99,102,241,.3)}
+.hero .tag{color:rgba(255,255,255,.85)}.hero .switch span{background:rgba(255,255,255,.3)}.hero .switch input:checked+span{background:#fff}.hero .switch input:checked+span:before{background:#6366f1}
+.list{list-style:none;margin:0;padding:0}.list li{padding:10px 0;border-top:1px solid var(--line)}.list li:first-child{border-top:0}
+.nn{font-weight:600;font-size:13px;word-break:break-all}.on{font-size:11.5px;color:var(--muted);word-break:break-all;margin-top:2px;display:flex;justify-content:space-between;gap:8px}
+.empty{text-align:center;padding:18px 6px;color:var(--muted)}.empty .ic{font-size:28px}
+.enh{display:flex;gap:10px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,#6366f1 12%,var(--card)),color-mix(in srgb,#06b6d4 12%,var(--card)));border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}.enh .ei{font-size:22px}.foot{display:flex;justify-content:space-between;align-items:center;font-size:12px}.card{padding:14px 16px;margin:12px 0 0}</style></head>
+<body>
+<div class="hero"><div class="brand"><img src="icons/icon48.png" alt=""><div><div class="name">智能下载命名</div><div class="tag" id="stateText">已开启 · 下载自动命名</div></div></div>
+<label class="switch lg"><input type="checkbox" id="enabled"><span></span></label></div>
+<div id="status" class="status idle" style="margin-top:12px"><span class="dot"></span><span id="statusText">正在检测命名引擎…</span></div>
+<div class="enh" id="enh" hidden><div class="ei">🎯</div><div style="flex:1"><div style="font-weight:600">开启增强识别，论文/网页标题识别更准</div><div class="muted" style="font-size:12px">读取 PDF 元数据与页面标题，全部在本机处理</div></div><button class="btn primary" id="enhBtn" style="padding:7px 12px;font-size:12.5px">一键开启</button></div>
+<div class="card"><div style="font-weight:600;margin-bottom:6px">最近重命名</div><ul class="list" id="list"></ul></div>
+<div class="foot" style="margin-top:12px"><span class="muted">文件名 = 标题_日期.扩展名</span><a href="#" id="opt">设置 →</a></div>
+<script src="popup.js"></script></body></html>

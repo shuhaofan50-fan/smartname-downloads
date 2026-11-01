@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>智能下载命名 · SmartName Downloads</title>
+<meta name="description" content="Chrome 扩展：下载时把乱码文件名改成完整标题加日期。默认使用本机 Chrome 内置 AI，也可选自己的 OpenAI 兼容 API。">
+<link rel="icon" href="assets/icon128.png">
+<style>
+:root {
+  --bg: #f4f2fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: #e6e4f0;
+  --accent: #4f46e5;
+  --grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 52%, #06b6d4 100%);
+  --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 16px 40px rgba(79, 70, 229, .08);
+  --okbg: #ecfdf5;
+  --ok: #047857;
+  --max: 1080px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1117;
+    --card: #181b24;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --line: #2a2f3a;
+    --accent: #a5b4fc;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px rgba(0, 0, 0, .35);
+    --okbg: #06281f;
+    --ok: #34d399;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(900px 420px at 8% -10%, rgba(99, 102, 241, .16), transparent 60%),
+    radial-gradient(700px 380px at 100% 0%, rgba(6, 182, 212, .12), transparent 55%),
+    var(--bg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+img { max-width: 100%; height: auto; }
+.wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+header {
+  position: sticky; top: 0; z-index: 5;
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
+.brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: 700; }
+.brand img { width: 36px; height: 36px; border-radius: 10px; }
+.brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+nav { display: flex; gap: 16px; align-items: center; font-size: 14px; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover { color: var(--text); }
+.hero { padding: 64px 0 20px; }
+.kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  padding: 4px 10px; border-radius: 999px; margin: 0 0 16px;
+}
+h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.12; letter-spacing: -.03em; margin: 0 0 16px; }
+h1 .grad { color: #6366f1; }
+@supports (background-clip: text) {
+  h1 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+}
+section, h2 { scroll-margin-top: 84px; }
+.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 0 22px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; padding: 0; list-style: none; }
+.pills li {
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow);
+}
+.preview {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); padding: 16px 18px; max-width: 760px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px;
+}
+.preview .old { color: var(--muted); text-decoration: line-through; }
+.preview .arrow { color: var(--accent); margin: 0 6px; }
+.preview .new { color: var(--accent); font-weight: 700; word-break: break-word; }
+h2 { font-size: 28px; letter-spacing: -.02em; margin: 48px 0 8px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); padding: 18px 18px 16px;
+}
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.shots { display: grid; gap: 16px; }
+.shots figure { margin: 0; }
+.shots img { display: block; width: 100%; border-radius: 16px; border: 1px solid var(--line); box-shadow: var(--shadow); background: #fff; }
+.shots figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.install { display: grid; grid-template-columns: 1fr 1.3fr; gap: 14px; }
+.soon {
+  display: inline-block; margin-top: 8px; background: var(--okbg); color: var(--ok);
+  font-weight: 700; border-radius: 10px; padding: 8px 12px; font-size: 14px;
+}
+ol.steps { margin: 8px 0 0; padding-left: 18px; }
+ol.steps li { margin: 6px 0; }
+code, .path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .92em; background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  padding: 1px 6px; border-radius: 6px;
+}
+.lang {
+  margin-top: 72px; padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+footer {
+  margin-top: 56px; padding: 28px 0 40px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+@media (max-width: 800px) {
+  .grid, .install { grid-template-columns: 1fr; }
+  .brand small, nav .hide-sm { display: none; }
+  nav { gap: 12px; font-size: 13px; }
+  nav a { white-space: nowrap; }
+  .bar { gap: 10px; }
+  .hero { padding-top: 28px; }
+  .wrap { width: min(var(--max), calc(100% - 32px)); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#zh">
+      <img src="assets/icon128.png" alt="">
+      <span>智能下载命名<small>SmartName Downloads · v1.2.5</small></span>
+    </a>
+    <nav>
+      <a href="#features" class="hide-sm">功能</a>
+      <a href="#shots" class="hide-sm">截图</a>
+      <a href="#install">安装</a>
+      <a href="privacy.html">隐私政策</a>
+      <a href="#en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero" id="zh">
+    <p class="kicker">Chrome 扩展 · Manifest V3</p>
+    <h1>乱码文件名，<br><span class="grad">一键变成完整标题</span></h1>
+    <p class="lead">浏览器保存文件的那一刻，智能下载命名按页面、论文或图片内容给出看得懂的文件名，并附上日期 <span class="path">_YYYY-MM-DD</span>。</p>
+    <ul class="pills">
+      <li>默认 Chrome 内置 AI</li>
+      <li>本机运行 · 免费</li>
+      <li>可选自己的 API Key</li>
+    </ul>
+    <div class="preview">
+      <div><span class="old">a8f3e2c1.pdf</span></div>
+      <div><span class="arrow">→</span><span class="new">Oral Nirmatrelvir for High-Risk, Nonhospitalized Adults with Covid-19_2026-11-01.pdf</span></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>功能</h2>
+    <p class="sub">有真实标题就完整保留，不截断、不概括。AI 不可用时马上改用页面标题，下载不会卡住。重名自动编号。</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Chrome 内置 AI</h3>
+        <p>默认使用 Gemini Nano，在你的电脑上运行。无需注册、无需 Key。桌面版 Chrome 138+，并在设置页下载一次内置模型。</p>
+      </article>
+      <article class="card">
+        <h3>自己的 API</h3>
+        <p>可选填 OpenAI 兼容接口，例如 DeepSeek、OpenAI、xAI 或自定义端点。Key 只保存在本机。</p>
+      </article>
+      <article class="card">
+        <h3>增强识别</h3>
+        <p>开启后读取 <span class="path">citation_title</span>、Dublin Core 与 Open Graph 标题，以及 PDF 内嵌标题。论文只把 PMC/PubMed 编号发给 NCBI，或把 DOI 发给 Crossref，换回官方标题。</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="shots">
+    <h2>界面</h2>
+    <p class="sub">弹窗里看最近的重命名；设置页切换命名引擎。</p>
+    <div class="shots">
+      <figure>
+        <img src="assets/screenshot-1-popup.png" alt="扩展弹窗：已开启自动命名，列出论文、图片、压缩包和表格的新文件名">
+        <figcaption>弹窗：开关、引擎状态、最近重命名。</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/screenshot-2-options.png" alt="设置页：命名引擎为自动，并可选 DeepSeek 等自己的 API">
+        <figcaption>设置：自动 / 内置 AI / 自己的 API。</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/screenshot-3-examples.png" alt="论文、视频、安装包、表格、图片和说明书的重命名示例">
+        <figcaption>论文、视频、安装包、表格、图片都会带上日期。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>安装</h2>
+    <div class="install">
+      <article class="card">
+        <h3>Chrome 网上应用店</h3>
+        <p>上架后可从商店一键安装。当前状态：</p>
+        <div class="soon">即将上架 / Coming soon to Chrome Web Store</div>
+      </article>
+      <article class="card">
+        <h3>手动安装 · Load unpacked</h3>
+        <p>从本仓库的 <span class="path">extension/</span> 文件夹加载未打包的扩展：</p>
+        <ol class="steps">
+          <li>克隆仓库 <span class="path">shuhaofan50-fan/smartname-downloads</span>。</li>
+          <li>打开 <span class="path">chrome://extensions</span>，打开「开发者模式」。</li>
+          <li>点击「加载已解压的扩展程序」，选择 <span class="path">extension/</span> 文件夹。</li>
+          <li>在工具栏固定「智能下载命名」。</li>
+        </ol>
+      </article>
+    </div>
+    <p class="sub" style="margin-top:18px">隐私政策：<a href="privacy.html">中文 / English</a>。源码与测试说明在 <a href="https://github.com/shuhaofan50-fan/smartname-downloads">GitHub</a>。许可证 MIT，Copyright 2026 Fan。</p>
+  </section>
+
+  <section class="lang" id="en" lang="en">
+    <p class="kicker">Chrome extension · Manifest V3</p>
+    <h1>Messy download names,<br><span class="grad">replaced by the full title</span></h1>
+    <p class="lead">The moment Chrome saves a file, SmartName Downloads names it from the page, paper, or image, and appends the date <span class="path">_YYYY-MM-DD</span>.</p>
+    <ul class="pills">
+      <li>Chrome built-in AI by default</li>
+      <li>On your device · free</li>
+      <li>Optional API key</li>
+    </ul>
+    <div class="preview">
+      <div><span class="old">a8f3e2c1.pdf</span></div>
+      <div><span class="arrow">→</span><span class="new">Oral Nirmatrelvir for High-Risk, Nonhospitalized Adults with Covid-19_2026-11-01.pdf</span></div>
+    </div>
+
+    <h2 id="features-en">Features</h2>
+    <p class="sub">A real title is kept in full. If AI is unavailable, the page title is used immediately, so the download never waits. Duplicate names are numbered.</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Chrome built-in AI</h3>
+        <p>Gemini Nano runs on your computer by default. No account and no key. Desktop Chrome 138+; download the on-device model once from the options page.</p>
+      </article>
+      <article class="card">
+        <h3>Your own API</h3>
+        <p>Optional OpenAI-compatible endpoint, such as DeepSeek, OpenAI, xAI, or a custom URL. The key stays on this device.</p>
+      </article>
+      <article class="card">
+        <h3>Enhanced recognition</h3>
+        <p>Reads <span class="path">citation_title</span>, Dublin Core, and Open Graph titles, plus a PDF's embedded title. For papers, only a PMC/PubMed id goes to NCBI, or a DOI to Crossref, to fetch the official title.</p>
+      </article>
+    </div>
+
+    <h2>Screenshots</h2>
+    <div class="shots">
+      <figure>
+        <img src="assets/screenshot-1-popup.png" alt="Popup with automatic renaming on and a list of recent descriptive filenames">
+        <figcaption>Popup: switch, engine status, and recent renames.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/screenshot-2-options.png" alt="Options page with Automatic engine selected and a DeepSeek API form">
+        <figcaption>Options: Automatic, built-in AI, or your own API.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/screenshot-3-examples.png" alt="Before-and-after names for a paper, video, zip, spreadsheet, photo, and manual">
+        <figcaption>Papers, videos, archives, spreadsheets, and images all get a date.</figcaption>
+      </figure>
+    </div>
+
+    <h2 id="install-en">Install</h2>
+    <div class="install">
+      <article class="card">
+        <h3>Chrome Web Store</h3>
+        <p>A one-click install will live here after review. Current status:</p>
+        <div class="soon">即将上架 / Coming soon to Chrome Web Store</div>
+      </article>
+      <article class="card">
+        <h3>Manual install · Load unpacked</h3>
+        <p>Load the <span class="path">extension/</span> folder from this repository:</p>
+        <ol class="steps">
+          <li>Clone <span class="path">shuhaofan50-fan/smartname-downloads</span>.</li>
+          <li>Open <span class="path">chrome://extensions</span> and turn on Developer mode.</li>
+          <li>Click <strong>Load unpacked</strong> and select the <span class="path">extension/</span> folder.</li>
+          <li>Pin SmartName from the toolbar puzzle menu.</li>
+        </ol>
+      </article>
+    </div>
+    <p class="sub" style="margin-top:18px"><a href="privacy.html">Privacy policy</a> (中文 and English). Source: <a href="https://github.com/shuhaofan50-fan/smartname-downloads">GitHub</a>. MIT License, Copyright 2026 Fan.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <span>智能下载命名 · SmartName Downloads</span>
+    <span><a href="privacy.html">隐私政策</a> · shuhaofan50@gmail.com</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>欢迎使用 智能下载命名</title><link rel="stylesheet" href="ui.css">
+<style>.wrap{max-width:640px;margin:0 auto;padding:48px 20px}.hero{text-align:center;margin-bottom:24px}.hero img{width:88px;height:88px;border-radius:22px;box-shadow:0 12px 30px rgba(99,102,241,.35)}
+.hero h1{font-size:28px;margin:16px 0 6px}.ex{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);border-radius:12px;padding:12px 14px;margin:12px 0;word-break:break-all}.ex s{color:var(--muted)}.ex b{color:var(--accent)}
+ul{padding-left:20px;margin:8px 0}li{margin:4px 0}.big{width:100%;padding:13px;font-size:15px;margin-top:8px}</style></head>
+<body><div class="wrap">
+<div class="hero"><img src="icons/icon128.png" alt=""><h1>欢迎使用 智能下载命名 🎉</h1><div class="muted">下载文件时自动命名为「完整标题 + 日期」</div></div>
+<div class="card"><h3>🎯 开启增强识别（推荐）</h3><p class="sub">尤其适合经常下载论文、PDF 的你</p>
+<div class="ex"><s>NEJMoa2118542.pdf</s><br>→ <b>Oral Nirmatrelvir for High-Risk, Nonhospitalized Adults with Covid-19_2026-11-01.pdf</b></div>
+<ul><li>读取 PDF 内的标题信息（元数据）和论文页面的标题</li><li>识别你点击的图片说明、链接文字</li><li><b>全部在你的浏览器本地完成</b>，不会上传到我们的服务器（我们也没有服务器）</li></ul>
+<p class="muted" style="font-size:12.5px">Chrome 会提示“读取和更改您在所有网站上的数据”——这是读取页面标题所需的权限，可随时在设置中关闭。</p>
+<button class="btn primary big" id="enable">一键开启增强识别</button>
+<div id="st" class="status ok" style="margin-top:12px" hidden><span class="dot"></span><span>已开启！现在去下载一篇论文试试吧</span></div></div>
+<div class="card"><h3>🤖 AI 命名</h3><p class="sub" style="margin:0">默认使用 Chrome 内置 AI（免费、本地运行）。也可以在 <a href="options.html">设置</a> 中接入自己的 DeepSeek / OpenAI / xAI。</p></div>
+<p style="text-align:center"><a href="#" id="skip" class="muted">暂不开启，稍后在设置中开启</a></p>
+</div><script src="welcome.js"></script></body></html>
